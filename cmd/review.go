@@ -60,7 +60,7 @@ func reviewRun(cmd *cobra.Command, args []string) error {
 		editor = "nvim"
 	}
 	fmt.Printf("Opening in %s...\n", editor)
-	if err := exec.Command(editor, wtPath).Run(); err != nil {
+	if err := exec.Command(editor, wtPath).Start(); err != nil {
 		fmt.Printf("Warning: failed to open %s: %v\n", editor, err)
 	}
 
