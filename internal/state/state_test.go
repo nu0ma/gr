@@ -75,7 +75,9 @@ func TestFindByBranch(t *testing.T) {
 func TestFindByCwd(t *testing.T) {
 	dir := t.TempDir()
 	wtPath := filepath.Join(dir, "wt")
-	os.MkdirAll(wtPath, 0755)
+	if err := os.MkdirAll(wtPath, 0755); err != nil {
+		t.Fatalf("failed to create dir: %v", err)
+	}
 
 	s := &State{}
 	s.Add(ReviewSession{Branch: "test", WorktreePath: wtPath, StartedAt: time.Now()})
@@ -94,7 +96,9 @@ func TestFindByCwd(t *testing.T) {
 func TestCleanStale(t *testing.T) {
 	dir := t.TempDir()
 	existing := filepath.Join(dir, "existing")
-	os.MkdirAll(existing, 0755)
+	if err := os.MkdirAll(existing, 0755); err != nil {
+		t.Fatalf("failed to create dir: %v", err)
+	}
 
 	s := &State{}
 	s.Add(ReviewSession{Branch: "valid", WorktreePath: existing, StartedAt: time.Now()})

@@ -42,11 +42,17 @@ func listRun(cmd *cobra.Command, args []string) error {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "BRANCH\tPATH\tAGE")
+	if _, err := fmt.Fprintln(w, "BRANCH\tPATH\tAGE"); err != nil {
+		return fmt.Errorf("failed to write header: %w", err)
+	}
 	for _, r := range st.Reviews {
 		age := time.Since(r.StartedAt).Truncate(time.Minute)
-		fmt.Fprintf(w, "%s\t%s\t%s\n", r.Branch, r.WorktreePath, age)
+		if _, err := fmt.Fprintf(w, "%s\t%s\t%s\n", r.Branch, r.WorktreePath, age); err != nil {
+			return fmt.Errorf("failed to write row: %w", err)
+		}
 	}
-	w.Flush()
+	if err := w.Flush(); err != nil {
+		return fmt.Errorf("failed to flush output: %w", err)
+	}
 	return nil
 }
