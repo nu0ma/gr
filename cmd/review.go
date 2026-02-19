@@ -3,8 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
-	"os/exec"
 	"time"
 
 	"github.com/nu0ma/gr/internal/gitutil"
@@ -55,15 +53,8 @@ func reviewRun(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to save state: %w", err)
 	}
 
-	editor := os.Getenv("GR_EDITOR")
-	if editor == "" {
-		editor = "nvim"
-	}
-	fmt.Printf("Opening in %s...\n", editor)
-	if err := exec.Command(editor, wtPath).Start(); err != nil {
-		fmt.Printf("Warning: failed to open %s: %v\n", editor, err)
-	}
-
-	fmt.Printf("\nReview ready! To finish: gr finish %s\n", branch)
+	fmt.Printf("\nReview ready!\n")
+	fmt.Printf("  cd %s\n", wtPath)
+	fmt.Printf("  gr finish %s\n", branch)
 	return nil
 }
