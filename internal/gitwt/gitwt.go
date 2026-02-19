@@ -2,7 +2,6 @@ package gitwt
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -51,17 +50,29 @@ func Exists(ctx context.Context, branch string) (bool, error) {
 }
 
 func List(ctx context.Context) ([]Worktree, error) {
-	cmd := exec.CommandContext(ctx, "git-wt", "--json")
+	cmd := exec.CommandContext(ctx, "git", "worktree", "list", "--porcelain")
 	out, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
-			return nil, fmt.Errorf("git-wt --json failed: %s", strings.TrimSpace(string(exitErr.Stderr)))
+			return nil, fmt.Errorf("git worktree list failed: %s", strings.TrimSpace(string(exitErr.Stderr)))
 		}
-		return nil, fmt.Errorf("git-wt --json failed: %w", err)
+		return nil, fmt.Errorf("git worktree list failed: %w", err)
 	}
+
 	var worktrees []Worktree
-	if err := json.Unmarshal(out, &worktrees); err != nil {
-		return nil, fmt.Errorf("failed to parse git-wt output: %w", err)
+	var current Worktree
+	for _, line := range strings.Split(string(out), "\n") {
+		if strings.HasPrefix(line, "worktree ") {
+			current = Worktree{Path: strings.TrimPrefix(line, "worktree ")}
+		} else if strings.HasPrefix(line, "branch refs/heads/") {
+			current.Branch = strings.TrimPrefix(line, "branch refs/heads/")
+		} else if line == "" && current.Path != "" {
+			worktrees = append(worktrees, current)
+			current = Worktree{}
+		}
+	}
+	if current.Path != "" {
+		worktrees = append(worktrees, current)
 	}
 	return worktrees, nil
 }
