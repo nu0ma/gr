@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"time"
 
@@ -54,9 +55,13 @@ func reviewRun(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to save state: %w", err)
 	}
 
-	fmt.Println("Opening in Cursor...")
-	if err := exec.Command("cursor", wtPath).Run(); err != nil {
-		fmt.Printf("Warning: failed to open Cursor: %v\n", err)
+	editor := os.Getenv("GR_EDITOR")
+	if editor == "" {
+		editor = "nvim"
+	}
+	fmt.Printf("Opening in %s...\n", editor)
+	if err := exec.Command(editor, wtPath).Run(); err != nil {
+		fmt.Printf("Warning: failed to open %s: %v\n", editor, err)
 	}
 
 	fmt.Printf("\nReview ready! To finish: gr finish %s\n", branch)
